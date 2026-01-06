@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Movements - Gerador</title>
+
+  <style>
+    :root{
+      --bg1:#0B1A33;
+      --bg2:#0F2B5B;
+      --card:#ffffff;
+      --text:#0b1220;
+      --muted:#5b677a;
+      --primary:#00A6FF;
+      --primary2:#0077ff;
+      --radius:16px;
+      --ok:#0f766e;
+      --warn:#b45309;
+      --err:#b91c1c;
+      --overlay: rgba(4, 10, 20, .68);
+    }
+
+    *{ box-sizing:border-box; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    body{
+      margin:0;
+      min-height:100vh;
+      color:var(--text);
+      background: radial-gradient(1200px 600px at 15% 10%, #1a4aa3 0%, transparent 60%),
+                  radial-gradient(1000px 600px at 85% 20%, #0ea5e9 0%, transparent 55%),
+                  linear-gradient(160deg, var(--bg1), var(--bg2));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+    }
+
+    .wrap{
+      width:min(980px, 100%);
+      display:grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap:20px;
+    }
+
+    .hero{ color:#eaf2ff; padding:10px 6px; }
+    .brand{ display:flex; align-items:center; gap:10px; margin-bottom:18px; }
+    .logo{
+      width:38px; height:38px; border-radius:12px;
+      background: linear-gradient(135deg, #00A6FF, #7C3AED);
+      box-shadow: 0 12px 30px rgba(0,0,0,.25);
+    }
+    .hero h1{
+      margin:0 0 10px;
+      font-size: clamp(26px, 4vw, 40px);
+      line-height:1.1;
+      letter-spacing:-0.02em;
+    }
+    .hero p{
+      margin:0;
+      color: rgba(234,242,255,.85);
+      max-width: 52ch;
+      line-height:1.5;
+    }
+    .pill{
+      display:inline-flex;
+      margin-top:16px;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .pill span{
+      font-size:12px;
+      padding:8px 10px;
+      border-radius:999px;
+      background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.18);
+      backdrop-filter: blur(6px);
+    }
+
+    .card{
+      background:var(--card);
+      border-radius: var(--radius);
+      padding:18px;
+      box-shadow: 0 18px 60px rgba(0,0,0,.35);
+      border: 1px solid rgba(255,255,255,.18);
+    }
+
+    .card h2{ margin: 4px 0 2px; font-size:18px; }
+    .card small{ color: var(--muted); }
+
+    .grid{ margin-top:14px; display:grid; gap:12px; }
+    label{ display:block; font-size:12px; color: var(--muted); margin-bottom:6px; }
+    .field{ display:flex; flex-direction:column; }
+
+    input{
+      height:44px;
+      border-radius:12px;
+      border:1px solid #d8deea;
+      padding: 0 12px;
+      font-size:14px;
+      outline:none;
+      transition: .15s ease;
+      background:#fff;
+    }
+    input:focus{
+      border-color: rgba(0,166,255,.7);
+      box-shadow: 0 0 0 4px rgba(0,166,255,.15);
+    }
+
+    .row{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
+    .actions{ margin-top:14px; display:flex; gap:10px; flex-wrap:wrap; }
+
+    button{
+      height:44px;
+      border:0;
+      border-radius:12px;
+      padding: 0 14px;
+      font-weight:600;
+      cursor:pointer;
+    }
+    .primary{
+      color:white;
+      background: linear-gradient(135deg, var(--primary), var(--primary2));
+      box-shadow: 0 14px 26px rgba(0,119,255,.25);
+    }
+    .secondary{
+      background:#f2f5fb;
+      color:#1f2a44;
+    }
+
+    .status{
+      margin-top:12px;
+      padding:10px 12px;
+      border-radius:12px;
+      border: 1px solid #e6edf8;
+      background:#f7f9fe;
+      font-size:12px;
+      color: var(--muted);
+      line-height:1.4;
+      min-height: 42px;
+    }
+    .status.ok{ border-color: rgba(15,118,110,.25); background: rgba(15,118,110,.08); color: #0f766e; }
+    .status.warn{ border-color: rgba(180,83,9,.25); background: rgba(180,83,9,.08); color: #b45309; }
+    .status.err{ border-color: rgba(185,28,28,.25); background: rgba(185,28,28,.08); color: #b91c1c; }
+
+    .credits{
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px solid #eef2fb;
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.35;
+    }
+    .credits a{ color: inherit; text-decoration: none; }
+    .credits a:hover{ text-decoration: underline; }
+
+    .modal{
+      position: fixed;
+      inset: 0;
+      background: var(--overlay);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      z-index: 9999;
+    }
+    .modal[aria-hidden="false"]{ display:flex; }
+    .modal-card{
+      width:min(920px, 100%);
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.45);
+      padding: 22px;
+    }
+    .modal-title{
+      font-size: clamp(22px, 2.5vw, 34px);
+      margin: 0 0 10px;
+      letter-spacing: -0.02em;
+    }
+    .modal-text{
+      margin:0;
+      font-size: 16px;
+      line-height: 1.5;
+      color:#1f2a44;
+    }
+    .modal-actions{
+      margin-top: 18px;
+      display:flex;
+      justify-content:flex-end;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+
+    .gate{
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(160deg, var(--bg1), var(--bg2));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:24px;
+      z-index: 10000;
+    }
+    .gate[aria-hidden="true"]{ display:none; }
+    .gate-card{
+      width:min(520px, 100%);
+      background: rgba(255,255,255,.95);
+      border-radius: 18px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.45);
+      padding: 20px;
+      border: 1px solid rgba(255,255,255,.25);
+    }
+    .gate-title{ margin: 0 0 6px; font-size: 18px; }
+    .gate-sub{ margin: 0 0 14px; color: var(--muted); font-size: 13px; line-height: 1.4; }
+    .gate-actions{ margin-top: 12px; display:flex; gap:10px; flex-wrap:wrap; }
+
+    @media (max-width: 860px){
+      .wrap{ grid-template-columns:1fr; }
+      .hero{ order:2; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="gate" id="gate" aria-hidden="false">
+    <div class="gate-card">
+      <h2 class="gate-title">GATE</h2>
+      <p class="gate-sub">Insira o Código para acessar a ferramenta.</p>
+
+      <div class="field">
+        <label>Insira o Código</label>
+        <input id="gatePass" type="password" placeholder="Código" autocomplete="off" inputmode="numeric" />
+      </div>
+
+      <div class="gate-actions">
+        <button class="primary" type="button" id="gateEnter">Entrar</button>
+        <button class="secondary" type="button" id="gateClear">Limpar</button>
+      </div>
+
+      <div class="status err" id="gateMsg" style="display:none; margin-top:12px;"></div>
+    </div>
+  </div>
+
+  <div class="wrap" id="app" aria-hidden="true">
+    <section class="hero">
+      <div class="brand">
+        <div class="logo"></div>
+        <div>
+          <div style="font-weight:700">Movements</div>
+          <div style="font-size:12px; opacity:.85">Gerador</div>
+        </div>
+      </div>
+
+      <h1>Abra movements com os parâmetros certos.</h1>
+      <p>Preencha a conta e o período desejado, depois clique em “Abrir”.</p>
+
+      <div class="pill">
+        <span>siteId: MLB</span>
+        <span>currencyId: BRL</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Filtros</h2>
+      <small>Campos obrigatórios</small>
+
+      <form id="f" class="grid" autocomplete="off">
+        <div class="field">
+          <label>Conta (ID numérico)</label>
+          <input name="user" type="text" required placeholder="Ex.: ID numérico da conta (somente números)" inputmode="numeric" />
+        </div>
+
+        <div class="row">
+          <div class="field">
+            <label>Data inicial</label>
+            <input name="beginDate" type="date" required />
+          </div>
+          <div class="field">
+            <label>Data final</label>
+            <input name="endDate" type="date" required />
+          </div>
+        </div>
+
+        <div class="actions">
+          <button class="primary" type="submit">Abrir</button>
+          <button class="secondary" type="button" id="export">Exportar extrato</button>
+        </div>
+
+        <div class="status" id="status" aria-live="polite"></div>
+
+        <div class="credits">
+          Criado por Matheus Ferreira — <a href="mailto:ext_matferr@mercadolivre.com">ext_matferr@mercadolivre.com</a>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <div class="modal" id="modal" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="modal-card" role="document">
+      <h2 class="modal-title">Recurso ainda não implementado</h2>
+      <p class="modal-text">
+        O recurso de automatizar a exportação de extrato não foi implementado.
+        Estamos trabalhando nessa possibilidade.
+      </p>
+      <div class="modal-actions">
+        <button class="primary" type="button" id="closeModal">Entendi</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /*
+      PT-BR:
+      Sei que esta "senha" no front-end não é uma proteção real: qualquer pessoa pode inspecionar o código e encontrar o valor por mais leigo que seja.
+      Mesmo assim, deixei assim propositalmente como um "gate", porque o acesso aos dados já depende de autenticação/permissões na plataforma e VPN. Ou seja: isso NÃO é um mecanismo de segurança, apenas um bloqueio simples de entrada.
+
+      EN:
+      I am aware this front-end "password" is not real security: anyone can inspect the code and find the value.
+      It is intentionally implemented only as a lightweight "gate", because data access already requires proper authentication/authorization on the platform and VPN.
+      This is NOT a security mechanism, just a simple entry gate.
+    */
+
+    const SITE_PASSWORD = "000";
+    const SESSION_HOURS = 6;
+    const ACCESS_KEY = "movements_gate_until";
+
+    const BASE = "https://transactional.adminml.com/user-search/movements";
+    const MIN_DATE = "1999-01-01";
+    const MAX_DATE = "3000-12-31";
+    const RARE_BEFORE = "2023-01-01";
+
+    const gate = document.getElementById("gate");
+    const app = document.getElementById("app");
+    const gatePass = document.getElementById("gatePass");
+    const gateEnter = document.getElementById("gateEnter");
+    const gateClear = document.getElementById("gateClear");
+    const gateMsg = document.getElementById("gateMsg");
+
+    const form = document.getElementById("f");
+    const statusEl = document.getElementById("status");
+    const exportBtn = document.getElementById("export");
+    const modal = document.getElementById("modal");
+    const closeModalBtn = document.getElementById("closeModal");
+
+    function nowMs(){ return Date.now(); }
+
+    function setGateError(msg){
+      gateMsg.style.display = msg ? "block" : "none";
+      gateMsg.textContent = msg || "";
+    }
+
+    function unlock(hours){
+      const until = nowMs() + hours * 60 * 60 * 1000;
+      localStorage.setItem(ACCESS_KEY, String(until));
+      gate.setAttribute("aria-hidden", "true");
+      app.setAttribute("aria-hidden", "false");
+      setGateError("");
+      setTimeout(() => {
+        const first = form.querySelector('input[name="user"]');
+        if (first) first.focus();
+      }, 0);
+    }
+
+    function isUnlocked(){
+      const until = Number(localStorage.getItem(ACCESS_KEY) || "0");
+      return Number.isFinite(until) && until > nowMs();
+    }
+
+    function lock(){
+      localStorage.removeItem(ACCESS_KEY);
+      app.setAttribute("aria-hidden", "true");
+      gate.setAttribute("aria-hidden", "false");
+      setGateError("");
+      gatePass.value = "";
+      gatePass.focus();
+    }
+
+    function tryEnter(){
+      if (gatePass.value === SITE_PASSWORD) {
+        unlock(SESSION_HOURS);
+      } else {
+        setGateError("Código inválido.");
+      }
+    }
+
+    if (isUnlocked()) {
+      unlock(SESSION_HOURS);
+    } else {
+      lock();
+    }
+
+    gateEnter.addEventListener("click", tryEnter);
+    gateClear.addEventListener("click", () => { gatePass.value = ""; setGateError(""); gatePass.focus(); });
+    gatePass.addEventListener("keydown", (e) => { if (e.key === "Enter") tryEnter(); });
+
+    function buildUrl({user, startDate, endDate}) {
+      const url = new URL(BASE);
+      url.searchParams.set("user", String(user).trim());
+      url.searchParams.set("currencyId", "BRL");
+      url.searchParams.set("siteId", "MLB");
+      url.searchParams.set("beginDate", startDate);
+      url.searchParams.set("endDate", endDate);
+      return url.toString();
+    }
+
+    function getValues(){
+      const data = new FormData(form);
+      return {
+        user: (data.get("user") || "").toString().trim(),
+        startDate: (data.get("beginDate") || "").toString(),
+        endDate: (data.get("endDate") || "").toString(),
+      };
+    }
+
+    function isValidUser(user){
+      return /^[0-9]+$/.test(user) && user.length > 0;
+    }
+
+    function isValidISODate(s){
+      return /^\d{4}-\d{2}-\d{2}$/.test(s);
+    }
+
+    function isRealDate(s){
+      if (!isValidISODate(s)) return false;
+      const [y, m, d] = s.split("-").map(Number);
+      if (y < 1 || m < 1 || m > 12 || d < 1 || d > 31) return false;
+      const dt = new Date(Date.UTC(y, m - 1, d));
+      return dt.getUTCFullYear() === y && (dt.getUTCMonth() + 1) === m && dt.getUTCDate() === d;
+    }
+
+    function between(s, a, b){
+      return s >= a && s <= b;
+    }
+
+    function setStatus(type, msg){
+      statusEl.className = "status" + (type ? " " + type : "");
+      statusEl.textContent = msg || "";
+    }
+
+    function validateAll(v){
+      const errors = [];
+      const warnings = [];
+
+      if (!v.user) errors.push("Preencha a conta (ID numérico).");
+      else if (!isValidUser(v.user)) errors.push("A conta deve conter apenas números.");
+
+      if (!v.startDate) errors.push("Preencha a data inicial.");
+      else if (!isRealDate(v.startDate)) errors.push("Data inicial inválida. Use uma data válida.");
+      else if (!between(v.startDate, MIN_DATE, MAX_DATE)) errors.push("A data inicial deve estar entre 1999 e 3000 (1999 é o ano em que o Mercado Livre foi criado).");
+
+      if (!v.endDate) errors.push("Preencha a data final.");
+      else if (!isRealDate(v.endDate)) errors.push("Data final inválida. Use uma data válida.");
+      else if (!between(v.endDate, MIN_DATE, MAX_DATE)) errors.push("A data final deve estar entre 1999 e 3000 (1999 é o ano em que o Mercado Livre foi criado).");
+
+      if (isRealDate(v.startDate) && isRealDate(v.endDate) && v.endDate < v.startDate) {
+        errors.push("A data final não pode ser menor que a data inicial.");
+      }
+
+      if (isRealDate(v.startDate) && v.startDate < RARE_BEFORE) {
+        warnings.push("Registros anteriores a 01/01/2023 por este site são raros; a melhor forma é utilizar BigQuery com as quatro queries.");
+      }
+      if (isRealDate(v.endDate) && v.endDate < RARE_BEFORE) {
+        warnings.push("Registros anteriores a 01/01/2023 por este site são raros; a melhor forma é utilizar BigQuery com as quatro queries.");
+      }
+
+      return { errors, warnings };
+    }
+
+    function refreshStatus(){
+      const v = getValues();
+      const { errors, warnings } = validateAll(v);
+
+      if (errors.length) { setStatus("err", errors[0]); return; }
+      if (warnings.length) { setStatus("warn", warnings[0]); return; }
+      if (v.user && v.startDate && v.endDate) { setStatus("ok", "Dados válidos. Você já pode prosseguir."); return; }
+      setStatus("", "");
+    }
+
+    function openModal(){
+      modal.setAttribute("aria-hidden", "false");
+      closeModalBtn.focus();
+    }
+
+    function closeModal(){
+      modal.setAttribute("aria-hidden", "true");
+      exportBtn.focus();
+    }
+
+    form.addEventListener("input", refreshStatus);
+    document.addEventListener("DOMContentLoaded", refreshStatus);
+
+    form.addEventListener("submit", (ev) => {
+      ev.preventDefault();
+      const v = getValues();
+      const { errors } = validateAll(v);
+      if (errors.length) { setStatus("err", errors[0]); return; }
+      window.open(buildUrl(v), "_blank", "noopener,noreferrer");
+    });
+
+    exportBtn.addEventListener("click", openModal);
+    closeModalBtn.addEventListener("click", closeModal);
+    modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && modal.getAttribute("aria-hidden") === "false") closeModal(); });
+  </script>
+</body>
+</html>
